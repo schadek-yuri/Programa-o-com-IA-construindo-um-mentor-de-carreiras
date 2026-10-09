@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Mentor de carreiras com IA e comparação de consumo de tokens.">
+  <title>Mentor de Carreiras IA</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <span class="tag">PROGRAMAÇÃO COM IA</span>
+    <h1>Mentor de Carreiras</h1>
+    <p>Compare prompts e entenda o consumo de tokens em cada solicitação.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Teste 1 — Prompt curto</h2>
+      <p class="prompt">"Me ajude a escolher uma carreira em tecnologia."</p>
+      <button id="testeCurto">Executar teste curto</button>
+      <div id="resultadoCurto" class="resultado" aria-live="polite">
+        Aguardando execução...
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Teste 2 — Prompt detalhado</h2>
+      <p class="prompt">
+        "Atue como mentor de carreiras em tecnologia. Faça uma análise
+        das minhas habilidades, interesses e objetivos profissionais.
+        Compare desenvolvimento web, ciência de dados e segurança da
+        informação. Para cada área, apresente competências necessárias,
+        ferramentas para estudar, um plano inicial de 30 dias e três
+        projetos para montar um portfólio. Finalize com recomendações
+        práticas para quem está começando."
+      </p>
+      <button id="testeDetalhado">Executar teste detalhado</button>
+      <div id="resultadoDetalhado" class="resultado" aria-live="polite">
+        Aguardando execução...
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Comparação dos resultados</h2>
+      <div id="comparacao" aria-live="polite">
+        Execute os dois testes para comparar o consumo.
+      </div>
+    </section>
+
+    <p class="aviso">
+      Importante: os resultados só serão reais quando os testes forem
+      executados por um modelo de IA que informe o uso de tokens.
+      A demonstração local não inventa métricas de consumo.
+    </p>
+  </main>
+
+  <footer>
+    <p>Projeto educacional • Mentor de Carreiras IA</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
+2. script.js
+O código abaixo funciona como uma demonstração local: ele compara os prompts, conta caracteres e palavras e explica por que isso não equivale à medição real de tokens. Para obter o consumo real, é necessário conectar o mentor da unidade ou uma API de IA.
+
+javascript
+
+const prompts = {
+  curto: "Me ajude a escolher uma carreira em tecnologia.",
+
+  detalhado: `Atue como mentor de carreiras em tecnologia.
+Faça uma análise das minhas habilidades, interesses e objetivos
+profissionais. Compare desenvolvimento web, ciência de dados e
+segurança da informação. Para cada área, apresente competências
+necessárias, ferramentas para estudar, um plano inicial de 30 dias
+e três projetos para montar um portfólio. Finalize com recomendações
+práticas para quem está começando.`
+};
+
+const resultados = {
+  curto: null,
+  detalhado: null
+};
+
+function analisarPrompt(texto) {
+  return {
+    caracteres: texto.length,
+    palavras: texto.trim().split(/\s+/).length
+  };
+}
+
+function exibirResultado(tipo) {
+  const prompt = prompts[tipo];
+  const analise = analisarPrompt(prompt);
+  const destino = document.getElementById(
+    tipo === "curto" ? "resultadoCurto" : "resultadoDetalhado"
+  );
+
+  resultados[tipo] = analise;
+
+  destino.replaceChildren();
+
+  const linhas = [
+    ["Caracteres", analise.caracteres],
+    ["Palavras", analise.palavras],
+    ["Tokens de entrada", "Não medidos"],
+    ["Tokens de saída", "Não medidos"],
+    ["Total de tokens", "Não medido"]
+  ];
+
+  linhas.forEach(([rotulo, valor]) => {
+    const linha = document.createElement("p");
+    const nome = document.createElement("strong");
+
+    nome.textContent = `${rotulo}: `;
+    linha.append(nome, document.createTextNode(String(valor)));
+    destino.appendChild(linha);
+  });
+
+  atualizarComparacao();
+}
+
+function atualizarComparacao() {
+  const destino = document.getElementById("comparacao");
+  destino.replaceChildren();
+
+  if (!resultados.curto || !resultados.detalhado) {
+    destino.textContent =
+      "Execute os dois testes para visualizar a comparação.";
+    return;
+  }
+
+  const curto = resultados.curto;
+  const detalhado = resultados.detalhado;
+
+  const diferencaCaracteres = detalhado.caracteres - curto.caracteres;
+  const diferencaPalavras = detalhado.palavras - curto.palavras;
+
+  const itens = [
+    `Diferença de caracteres: ${diferencaCaracteres}`,
+    `Diferença de palavras: ${diferencaPalavras}`,
+    "O prompt detalhado contém mais texto e tende a consumir mais tokens de entrada."
+  ];
+
+  itens.forEach(texto => {
+    const p = document.createElement("p");
+    p.textContent = texto;
+    destino.appendChild(p);
+  });
+
+  const aviso = document.createElement("p");
+  aviso.className = "aviso";
+  aviso.textContent =
+    "A quantidade real de tokens de saída depende da resposta gerada pela IA. " +
+    "Caracteres e palavras não substituem a contagem de tokens.";
+  destino.appendChild(aviso);
+}
+
+document.getElementById("testeCurto").addEventListener("click", () => {
+  exibirResultado("curto");
+});
+
+document.getElementById("testeDetalhado").addEventListener("click", () => {
+  exibirResultado("detalhado");
+});
